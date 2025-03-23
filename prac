@@ -1,0 +1,122 @@
+#include <iostream>
+using namespace std
+
+struct node {
+    int data
+    node* left
+    node* right
+    bool left_thread
+    bool right_thread
+}
+
+node* root = nullptr
+
+node* new_node(int data) {
+    node* temp = new node
+    temp->data = data
+    temp->left = nullptr
+    temp->right = nullptr
+    temp->left_thread = false
+    temp->right_thread = false
+    return temp
+}
+
+node* insert(node* root, int data) {
+    if (root == nullptr) {
+        return new_node(data)
+    }
+    if (data < root->data) {
+        root->left = insert(root->left, data)
+    } else {
+        root->right = insert(root->right, data)
+    }
+    return root
+}
+
+void inorder(node* root) {
+    if (root == nullptr) return
+    node* temp = root
+    while (temp != nullptr) {
+        while (temp->left != nullptr && !temp->left_thread) {
+            temp = temp->left
+        }
+        cout << temp->data << " "
+        if (temp->right_thread) {
+            temp = temp->right
+        } else {
+            temp = temp->right
+            while (temp != nullptr && temp->left != nullptr) {
+                temp = temp->left
+            }
+        }
+    }
+    cout << endl
+}
+
+void preorder(node* root) {
+    if (root == nullptr) return
+    node* temp = root
+    while (temp != nullptr) {
+        cout << temp->data << " "
+        if (!temp->left_thread) {
+            temp = temp->left
+        } else if (!temp->right_thread) {
+            temp = temp->right
+        } else {
+            break
+        }
+    }
+    cout << endl
+}
+
+node* convert_to_threaded(node* root) {
+    node* prev = nullptr
+    node* current = root
+    while (current != nullptr) {
+        if (current->left == nullptr) {
+            current->left_thread = true
+            current->left = prev
+            if (prev != nullptr) {
+                prev->right_thread = true
+                prev->right = current
+            }
+            prev = current
+            current = current->right
+        } else {
+            node* temp = current->left
+            while (temp->right != nullptr && !temp->right_thread) {
+                temp = temp->right
+            }
+            temp->right = current
+            temp->right_thread = true
+            current = current->left
+        }
+    }
+    return root
+}
+
+int main() {
+    root = insert(root, 50)
+    root = insert(root, 30)
+    root = insert(root, 20)
+    root = insert(root, 40)
+    root = insert(root, 70)
+    root = insert(root, 60)
+    root = insert(root, 80)
+
+    cout << "Inorder traversal: "
+    inorder(root)
+
+    cout << "Preorder traversal: "
+    preorder(root)
+
+    root = convert_to_threaded(root)
+
+    cout << "Inorder traversal of threaded tree: "
+    inorder(root)
+
+    cout << "Preorder traversal of threaded tree: "
+    preorder(root)
+
+    return 0
+}
